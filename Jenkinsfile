@@ -29,12 +29,10 @@ pipeline {
 
     stage('Push image to registry') {
       steps {
+        // Etiquetar la imagen con el nombre del registro local y empujar la imagen al registro
         sh '''
-        # Etiquetar la imagen con el nombre del registro local
-        sudo docker tag ${env.APP_NAME} ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}
-        
-        # Empujar la imagen al registro
-        sudo docker push ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}
+          sudo docker tag ${env.APP_NAME} ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}          
+          sudo docker push ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}
         '''
       }
     }
