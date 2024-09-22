@@ -27,13 +27,18 @@ pipeline {
       }
     }
 
+    stage('Tag image') {
+      steps {
+        sh """
+          sudo docker tag ${env.APP_NAME} ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}
+        """
+      }
+    }
+
     stage('Push image to registry') {
       steps {
-        // Etiquetar la imagen con el nombre del registro local y empujar la imagen al registro
         sh """
-          set -x  # Modo de depuración para imprimir los comandos antes de ejecutarlos
-          sudo docker tag ${env.APP_NAME} ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME} || echo "Error en docker tag"
-          sudo docker push ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME} || echo "Error en docker push"
+          sudo docker push ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}
         """
       }
     }
