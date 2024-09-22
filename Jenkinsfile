@@ -51,14 +51,14 @@ pipeline {
       steps {
         script {
           withCredentials([sshUserPrivateKey(credentialsId: 'deploy-ssh-key', keyFileVariable: 'SSH_KEY')]) {
-            sh '''
-                ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${DEPLOY_USER}@${DEPLOY_SERVER} bash -c '
-                    docker pull ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
-                    docker stop ${env.APP_NAME} || true
-                    docker rm ${env.APP_NAME} || true
-                    docker run -d --name ${env.APP_NAME} -p 3000:3000 ${env.APP_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
-                '
-            '''
+            sh """
+              ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${DEPLOY_USER}@${DEPLOY_SERVER} bash -c "
+                docker pull ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} &&
+                docker stop ${env.APP_NAME} || true &&
+                docker rm ${env.APP_NAME} || true &&
+                docker run -d --name ${env.APP_NAME} -p 3000:3000 ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
+              "
+            """
           }
         }
       }
