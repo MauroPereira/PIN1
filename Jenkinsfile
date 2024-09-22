@@ -30,7 +30,7 @@ pipeline {
     stage('Tag image') {
       steps {
         sh """
-          sudo docker tag ${env.APP_NAME} ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}
+          sudo docker tag ${env.APP_NAME} ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
         """
       }
     }
@@ -38,7 +38,7 @@ pipeline {
     stage('Push image to registry') {
       steps {
         sh """
-          sudo docker push ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}
+          sudo docker push ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
         """
       }
     }
