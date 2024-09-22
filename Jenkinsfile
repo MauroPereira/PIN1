@@ -6,36 +6,62 @@ pipeline {
   }
 
   environment {
-    ARTIFACT_ID = "elbuo8/webapp:${env.BUILD_NUMBER}"
+      //DOCKER_IMAGE_NAME = "192.168.100.20:5000/testapp"
+      DOCKER_REGISTRY_SERVER = "192.168.100.20:5000"
+      APP_NAME =  "pin1"
+      DEPLOY_SERVER = "192.168.100.21"
+      DEPLOY_USER = "root"
   }
-   stages {
-   stage('Building image') {
+  
+  stages {
+
+    stage('Building image') {
       steps{
-          sh '''
-          cd webapp
-          docker build -t testapp .
-             '''  
+          sh "sudo docker build -t ${env.APP_NAME} ."  
         }
-    }
-  
-  
+    }    
+
     stage('Run tests') {
       steps {
-        sh "docker run testapp npm test"
+        sh "sudo docker run ${env.APP_NAME} npm test"
       }
     }
-   stage('Deploy Image') {
-      steps{
-        sh '''
-        docker tag testapp 127.0.0.1:5000/mguazzardo/testapp
-        docker push 127.0.0.1:5000/mguazzardo/testapp   
-        '''
+
+    stage('Tag image') {
+      steps {
+        sh """
+          sudo docker tag ${env.APP_NAME} ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
+        """
+      }
+    }
+
+    stage('Push image to registry') {
+      steps {
+        sh """
+          sudo docker push ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
+        """
+      }
+    }
+
+    stage('Deploy') {
+      when {
+          branch 'dev'
+      }
+
+      steps {
+        script {
+          withCredentials([sshUserPrivateKey(credentialsId: 'deploy-ssh-key', keyFileVariable: 'SSH_KEY')]) {
+            sh """
+              ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${DEPLOY_USER}@${DEPLOY_SERVER} bash -c "
+                docker pull ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} &&
+                docker stop ${env.APP_NAME} || true &&
+                docker rm ${env.APP_NAME} || true &&
+                docker run -d --name ${env.APP_NAME} -p 3000:3000 ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
+              "
+            """
+          }
         }
       }
     }
+  }
 }
-
-
-    
-  
-
