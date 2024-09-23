@@ -6,7 +6,6 @@ pipeline {
   }
 
   environment {
-      //DOCKER_IMAGE_NAME = "192.168.100.20:5000/testapp"
       DOCKER_REGISTRY_SERVER = "192.168.100.20:5000"
       APP_NAME =  "pin1"
       DEV_SERVER = "192.168.100.21"
