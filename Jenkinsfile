@@ -30,7 +30,8 @@ pipeline {
     stage('Tag image') {
       steps {
         sh """
-          sudo docker tag ${env.APP_NAME} ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
+          sudo docker tag ${env.APP_NAME} ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} && \
+          sudo docker tag ${env.APP_NAME} ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:latest
         """
       }
     }
@@ -39,6 +40,7 @@ pipeline {
       steps {
         sh """
           sudo docker push ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
+          sudo docker push ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:latest
         """
       }
     }
