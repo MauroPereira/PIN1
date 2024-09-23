@@ -9,8 +9,10 @@ pipeline {
       //DOCKER_IMAGE_NAME = "192.168.100.20:5000/testapp"
       DOCKER_REGISTRY_SERVER = "192.168.100.20:5000"
       APP_NAME =  "pin1"
-      DEPLOY_SERVER = "192.168.100.21"
-      DEPLOY_USER = "root"
+      DEV_SERVER = "192.168.100.21"
+      DEV_USER = "root"
+      PROD_SERVER = "192.168.100.22"
+      PROD_USER = "root"
   }
   
   stages {
@@ -54,7 +56,7 @@ pipeline {
         script {
           withCredentials([sshUserPrivateKey(credentialsId: 'deploy-ssh-key', keyFileVariable: 'SSH_KEY')]) {
             sh """
-              ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${DEPLOY_USER}@${DEPLOY_SERVER} bash -c "
+              ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${DEV_USER}@${DEV_SERVER} bash -c "
                 docker pull ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} &&
                 docker stop ${env.APP_NAME} || true &&
                 docker rm ${env.APP_NAME} || true &&
@@ -73,7 +75,7 @@ pipeline {
         script {
           withCredentials([sshUserPrivateKey(credentialsId: 'deploy-ssh-key', keyFileVariable: 'SSH_KEY')]) {
             sh """
-              ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${DEPLOY_USER}@${DEPLOY_SERVER} bash -c "
+              ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${PROD_USER}@${PROD_SERVER} bash -c "
                 docker pull ${env.DOCKER_REGISTRY_SERVER}/${env.APP_NAME}:latest &&
                 docker stop ${env.APP_NAME} || true &&
                 docker rm ${env.APP_NAME} || true &&
